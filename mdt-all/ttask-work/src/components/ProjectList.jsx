@@ -75,11 +75,11 @@ const handleCreateProject = async (e) => {
   setCreating(true);
 
   try {
-    const response = await apiPost("/projects", {
-      name: formData.name,
-      description: formData.description,
-      ownerId: user?.user_id,
-    });
+    const response = await apiPost("/projects",   {
+  "name": formData.name,
+  "description": formData.description,
+  "ownerId": user?.id, //"3805683c-c78e-4a15-a882-191e593dc25b"
+});
 
     let data;
     try {
