@@ -4,8 +4,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/authSlice';
 import { useInactivityLogout } from '../hooks/useInactivityLogout';
 import { MdLogout, MdFolderOpen } from 'react-icons/md';
-
-
+import { useEffect } from 'react';
+import {
+  setProjects,
+  setLoading,          // ← import this
+  setError,
+  clearError,
+} from "../store/projectSlice";
+import { apiGet, apiPost, apiPatch } from "../utils/apiClient";
 
 const Card = ({ label, count, bg }) => {
     return (
@@ -31,31 +37,68 @@ Card.propTypes = {
 const Dashboard = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+      const { projects, loading, error } = useSelector((state) => state.projects);
     // const { user } = useSelector((state) => state.auth);
+
+     const { currentProject, tasks, loading:loading_, error:error_ } = useSelector(
+          (state) => state.projects
+        );
+        console.log("Current Project in Dashboard:", tasks);
+
+
     const user = JSON.parse(localStorage.getItem("user"));
 
     // Use inactivity logout hook
     useInactivityLogout();
+
+     useEffect(() => {
+        fetchProjects();
+      }, []);
+    
+
+    
+      
+      const fetchProjects = async () => {
+        dispatch(setLoading(true));
+        try {
+          const response = await apiGet("/projects");
+          const data = await response.json();
+          if (response.ok) {
+            console.log("Fetched projects data:", data);
+            dispatch(setProjects(data.body || data.data || []));
+            dispatch(clearError());
+          } else {
+            console.error("Failed to fetch projects:", data.error);
+            dispatch(setError(data.error || "Failed to fetch projects"));
+          }
+        } catch (err) {
+            console.error("Failed to fetch projects:", err);
+          dispatch(setError(err.message));
+        } finally {
+          dispatch(setLoading(false));
+        }
+      };
     
     const stats = [
         {
-            label: "TOTAL TASK",
-            total: 50,
+            label: "TOTAL Project(s)",
+            total: projects.length || 0,
             bg: "bg-[#1d4ed8]",
         },
         {
             label: "COMPLETED TASK",
-            total: 25,
+            total: 0,
             bg: "bg-[#0f766e]",
         },
         {
             label: "TASK IN PROGRESS",
-            total: 15,
+            total: 0,
             bg: "bg-[#f59e0b]",
         },
         {
             label: "PENDING",
-            total: 10,
+            total: 0,
             bg: "bg-[#be185d]",
         },
         
