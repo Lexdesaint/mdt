@@ -1,0 +1,6 @@
+{
+  "nodemon": {
+    "exec": "ts-node",
+    "ext": "ts,js,json"
+  }
+}
